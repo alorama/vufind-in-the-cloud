@@ -1,0 +1,35 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.vufind</groupId>
+  <artifactId>vufind</artifactId>
+  <name>VuFind</name>
+  <version>1.3</version>
+  <build>
+        <sourceDirectory>.</sourceDirectory>
+        <outputDirectory></outputDirectory>
+        <plugins>
+           <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <configuration>
+                  <source>1.5</source>
+                  <target>1.5</target>
+                  <excludes>
+                      <exclude>**/*.*</exclude>
+                  </excludes>
+              </configuration>
+           </plugin>
+        </plugins>
+  </build>
+  <properties>
+        <sonar.dynamicAnalysis>true</sonar.dynamicAnalysis>
+        <!-- <sonar.phase>generate-sources</sonar.phase> -->
+        <sonar.language>php</sonar.language>
+        <sonar.phpUnit.shouldRun>true</sonar.phpUnit.shouldRun>
+        <sonar.phpUnit.mainTestClass>tests/AllTests.php</sonar.phpUnit.mainTestClass>
+        <sonar.phpcpd.excludes>web/interface/compile web/sys/mobileesp</sonar.phpcpd.excludes>
+        <sonar.phpDepend.ignore>web/interface/compile,web/sys/mobileesp</sonar.phpDepend.ignore>
+  </properties>
+</project>
