@@ -10,6 +10,7 @@ Files Changed
 /usr/local/vufind/web/services/Search/Home.php
 /usr/local/vufind/web/interface/themes/default/layout.tpl
 /usr/local/vufind/sys/SearchObject/Solr.php
+/usr/local/vufind/import/marc.properties
 
                                VuFind
               Open Source Library Resource Discovery System
