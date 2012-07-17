@@ -56,6 +56,12 @@ spl_autoload_register('vuFindAutoloader');
 if (file_exists(dirname(__FILE__).'/local_overrides.php')) {
     include_once dirname(__FILE__).'/local_overrides.php';
 }
+// alpat test get
+if (isset($_GET['mylibrary'])) {
+  $getloc = $_GET['mylibrary'];
+  setcookie('location', $getloc, null,'/');
+  $_COOKIE['location'] = $getloc;
+}
 
 // Sets global error handler for PEAR errors
 PEAR::setErrorHandling(PEAR_ERROR_CALLBACK, 'handlePEARError');
@@ -115,6 +121,20 @@ if (isset($_POST['mylang'])) {
     $language = (isset($_COOKIE['language'])) ? $_COOKIE['language'] :
                     $configArray['Site']['language'];
 }
+
+$interface->assign('locationList', $configArray['Locations']);
+// Setup Location alpat first try
+if (isset($_POST['mylocn'])) {
+    $location = $_POST['mylocn'];
+    if ($location == 'All') {
+        setcookie('location', "", 1, '/');
+        unset($_COOKIE['location']);
+    } else {
+        setcookie('location', $location, null, '/');
+        $_COOKIE['location'] = $location;
+    }
+}
+$interface->assign('userLocn', isset($_COOKIE['location']) ? $_COOKIE['location'] : '');
 // Make sure language code is valid, reset to default if bad:
 $validLanguages = array_keys($configArray['Languages']);
 if (!in_array($language, $validLanguages)) {
