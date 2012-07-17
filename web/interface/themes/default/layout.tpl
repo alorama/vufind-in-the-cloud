@@ -65,6 +65,19 @@
               <noscript><input type="submit" value="{translate text="Set"}" /></noscript>
             </form>
           {/if}
+
+         Select a location: 
+         <form method="post" name="locnForm" action="">
+         <div class="hiddenLabel"><label for="mylocn">{translate text="Location"}:</label></div>
+         <select id="mylocn" name="mylocn" onChange="document.locnForm.submit();">
+         {foreach from=$locationList key=locnCode item=locnName}
+           <option value="{$locnCode}"{if $userLocn == $locnCode} selected{/if}>{translate text=$locnName}</option>
+           {/foreach}
+         </select>
+         <noscript><input type="submit" value="{translate text="Set"}" /></noscript>
+         </form>	  
+	  
+	  
         </div>
 
         {if $showTopSearchBox}
