@@ -45,6 +45,11 @@ class Home extends Action
      *
      * @return void
      * @access public
+     
+    (isset($_SESSION['lastUserSort']) ? $_SESSION['lastUserSort'] : '') .
+     '|' .
+     isset ($_COOKIE['location']) ? $_COOKIE['location'] : '';
+     
      */
     public function launch()
     {
@@ -57,7 +62,11 @@ class Home extends Action
             (UserAccount::isLoggedIn() ? '1' : '0') . '|' .
             (isset($_SESSION['lastUserLimit']) ? $_SESSION['lastUserLimit'] : '') .
             '|' .
-            (isset($_SESSION['lastUserSort']) ? $_SESSION['lastUserSort'] : '');
+            // (isset($_SESSION['lastUserSort']) ? $_SESSION['lastUserSort'] : ''); alpat added 3 exchanged this for 3 below
+	   (isset($_SESSION['lastUserSort']) ? $_SESSION['lastUserSort'] : '') .
+            '|' .
+            isset ($_COOKIE['location']) ? $_COOKIE['location'] : '';  
+	    
         if (!$interface->is_cached('layout.tpl', $cacheId)) {
             $interface->setPageTitle('Search Home');
             $interface->assign('searchTemplate', 'search.tpl');
