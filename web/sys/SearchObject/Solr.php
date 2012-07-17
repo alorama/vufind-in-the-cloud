@@ -205,6 +205,10 @@ class SearchObject_Solr extends SearchObject_Base
                 $this->addFilter('illustrated:"Not Illustrated"');
             }
         }
+        // could use institution but using building for now
+        if (!empty($_COOKIE['location'])) {
+          $this->addHiddenFilter('building:"' . $_COOKIE['location'] .'"');
+        }
     }
 
     /**

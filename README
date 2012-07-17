@@ -1,4 +1,15 @@
 Starting point for consortium config with the cloud driver.  Allen Patrick 05/25/2012
+Files Added
+/usr/local/vufind/web/Drivers/cloud.php
+/usr/local/vufind/web/Drivers/cloudrestful.php
+
+Files Changed
+/usr/local/vufind/web/conf/config.ini
+/usr/local/vufind/web/conf/facets.ini
+/usr/local/vufind/web/index.php
+/usr/local/vufind/web/services/Search/Home.php
+/usr/local/vufind/web/interface/themes/default/layout.tpl
+/usr/local/vufind/sys/SearchObject/Solr.php
 
                                VuFind
               Open Source Library Resource Discovery System
