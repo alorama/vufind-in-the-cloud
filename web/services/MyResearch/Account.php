@@ -127,6 +127,9 @@ class Account extends Action
                 $user->password = $_POST['password'];
                 $user->firstname = $_POST['firstname'];
                 $user->lastname = $_POST['lastname'];
+
+                $user->home_library = $_POST['home_library']; // goes with account.tpl needed to save home library.
+
                 $user->created = date('Y-m-d h:i:s');
                 $user->insert();
             } else {

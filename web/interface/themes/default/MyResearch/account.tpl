@@ -29,11 +29,8 @@
           <td>{translate text="Home Library"}: </td>
           <td>
           <select size="6" name="home_library" multiple="no" > 
-          <option value="001" >Leland Library</option>
-          <option value="002" >Benzie Shores Library</option>
-          <option value="003" >Sutton's Bay Library</option>
-          <option value="004" >Kalkaska Library</option>	
-          <option value="005" >Alden Library</option>		
+          <option value="001" >Central Lake Library</option>
+          <option value="005" >Kalkaska Library</option>		
           </select>
 	  </td>
         </tr>	
