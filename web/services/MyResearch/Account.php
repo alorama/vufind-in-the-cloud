@@ -127,9 +127,9 @@ class Account extends Action
                 $user->password = $_POST['password'];
                 $user->firstname = $_POST['firstname'];
                 $user->lastname = $_POST['lastname'];
-
-                $user->home_library = $_POST['home_library']; // goes with account.tpl needed to save home library.
-
+                $user->cat_password = $_POST['password'];       // goes with account.tpl
+                $user->cat_username = $_POST['cat_username'];   // goes with account.tpl
+                $user->home_library = $_POST['home_library'];	// goes with /interface/themes/default/MyResearch/account.tpl	
                 $user->created = date('Y-m-d h:i:s');
                 $user->insert();
             } else {
