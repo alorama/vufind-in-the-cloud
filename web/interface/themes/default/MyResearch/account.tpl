@@ -29,11 +29,18 @@
           <td>{translate text="Home Library"}: </td>
           <td>
           <select size="6" name="home_library" multiple="no" > 
-          <option value="001" >Central Lake Library</option>
-          <option value="005" >Kalkaska Library</option>		
+          <option value="001" >Centrl Lake Library</option>
+          <option value="002" >Kalk account.tpl</option>
           </select>
 	  </td>
-        </tr>	
+        </tr>
+
+        <tr>
+          <td>{translate text="Patron Barcode"}: </td>
+          <td><input type="text" name="cat_username" value="{$formVars.cat_username|escape}" size="30"></td>
+        </tr>
+ 
+	
         <tr>
           <td>{translate text="Password"}: </td>
           <td><input type="password" name="password" size="15"></td>
