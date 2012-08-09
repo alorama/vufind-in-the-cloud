@@ -88,7 +88,7 @@ class Home extends Action
             $searchObject->close();
 
             // Add a sorted version to the facet list:
-            if (count($facetList) > 0) {
+            if (count($facetList) > 999990) {
                 $facets = array();
                 foreach ($facetList as $facet => $details) {
                     $facetList[$facet]['sortedList'] = array();
