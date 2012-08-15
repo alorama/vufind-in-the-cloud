@@ -21,9 +21,7 @@ class cloudrestful extends cloud
         $aArray =  $this->config;
 //        error_log(print_r($aArray, true), 3, 'cloudRestful.log');
         $this->ws_host = $this->config['WebServices']['host'];
-
         $this->host   = $this->config['Catalog']['host'];
-             
         $this->ws_port = $this->config['WebServices']['port'];
 //        $this->ws_app = $this->config['WebServices']['app'];
 
@@ -48,10 +46,8 @@ class cloudrestful extends cloud
      */
     public function getConfig($function)
     {
-
        // $aArray = $function ;
        // error_log(print_r($aArray, true), 3, 'function.log');
-
        // error_log(__FILE__ . " line " . __LINE__ . ' inside cloud restful getconfig ' . $function ,0);
         if (isset($this->config[$function]) ) {
             $functionConfig = $this->config[$function];
@@ -211,11 +207,13 @@ class cloudrestful extends cloud
     {
         // Build Hierarchy
         $procrequest = 'isrenewable';
+        $user = UserAccount::isLoggedIn();
+        $home_library = $user->home_library;
 	
 	// error_log(__FILE__ . " line " . __LINE__ . ' inside cloud restful _isRenewable procrequest ' . $procrequest ,0);
         // Add Required Params
         $params = array(
-            "ORG" => $this->agency,
+            "ORG" => $home_library,
             "PATRON_ID" => $patronId,
             "ITEM_ID"   => $itemId
         );
@@ -275,7 +273,7 @@ class cloudrestful extends cloud
     {
 
         $aArray = $patron ;
-        error_log(print_r($aArray, true), 3, 'gpatron.log');
+        error_log(print_r($aArray, true), 3, '/tmp/gpatron.log');
 
         if ($this->ws_pickUpLocations) {
             foreach ($this->ws_pickUpLocations as $code => $library) {
@@ -346,7 +344,7 @@ class cloudrestful extends cloud
  
 //       error_log(__FILE__ . " line " . __LINE__ . ' _makeRequest mode=' . $mode .' $urlParams=' . $urlParams  ,0);
        $aArray = $params;
-       error_log(print_r($aArray, true), 3, 'params.log');
+       error_log(print_r($aArray, true), 3, '/tmp/params.log');
 //       error_log(__FILE__ . " line " . __LINE__ . ' _makeRequest function $xml=' . $xml  ,0);
 
         foreach ($params as $key => $param) {
@@ -381,7 +379,7 @@ class cloudrestful extends cloud
         libxml_use_internal_errors(true);
         $simpleXML = simplexml_load_string($xmlResponse);
         $aArray = $simpleXML;
-        error_log(print_r($aArray, true), 3, 'xmlresponse.log');
+        error_log(print_r($aArray, true), 3, '/tmp/_makeRequestxmlresponse.log');
         libxml_use_internal_errors($oldLibXML);
         if ($simpleXML === false) {
             return false;
@@ -403,15 +401,17 @@ class cloudrestful extends cloud
     {
         error_log(__FILE__ . " line " . __LINE__ . ' _checkAccountBlocks $patronId=' . $patronId,0);
         $blockReason = false;
-        // Build Hierarchy
+       	    $user = UserAccount::isLoggedIn();
+	    $home_library = $user->home_library;
+	 // Build Hierarchy
         $procrequest = 'checkaccountblocks';
             $params = array(
                 "RTYPE"          => 'BLOCKS',
-                "ORG"            => $this->agency,
+                "ORG"            => $home_library,
                 "PATRON_NUM"     => $patronId
             );
         $result = $this->_makeRequest($procrequest, $params);	
-	error_log(print_r($result, true), 3, 'results.log');
+	error_log(print_r($result, true), 3, '/tmp/_checaccountblocs.log');
             if ($result) {
                 $node  = $result->children();
                 $reply = $node[0]->replytext;
@@ -444,18 +444,21 @@ class cloudrestful extends cloud
     public function renewMyItems($renewDetails)
     {
         $aArray = $renewDetails ;
-        error_log(print_r($aArray, true), 3, 'renewDetails1.log');
+        error_log(print_r($aArray, true), 3, '/tmp/renewmyitems1.log');
         $renewProcessed = array();
         $renewResult = array();
         $failIDs = array();
-	
         $patronId = $renewDetails['patron'][0]['pat_id']; // was 'id'
+	
+	$user = UserAccount::isLoggedIn();
+	$home_library = $user->home_library;
+	
 	
   //  error_log(__FILE__ . " line " . __LINE__ . ' renewMyItems $patronId=' . $patronId,0);
 	
         // Get Account Blocks
        $finalResult['blocks'] = $this->_checkAccountBlocks($patronId);
-        error_log(print_r($finalResult, true), 3, 'renewDetails2.log');		
+        error_log(print_r($finalResult, true), 3, '/tmp/renewmyitems2.log');		
 
         if ($finalResult['blocks'] === false) {
             // Add Items and Attempt Renewal
@@ -480,13 +483,13 @@ class cloudrestful extends cloud
             $params = array(
                 "RTYPE"     => $renew,
                 "PATRON_ID" => $patronId,
-                "agency"    => $this->agency,
+                "ORG"    => $home_library,
                 "ITEM_ID"   => $renewID
             );				
                 // Attempt Renewal
                 $renewalObj = $this->_makeRequest($procrequest, $params);
 		
-                error_log(print_r($renewalObj, true), 3, 'renewalObj.log');
+                error_log(print_r($renewalObj, true), 3, '/tmp/renewalObj.log');
 		
                 $process = $this->_processRenewals($renewalObj);
                 if (PEAR::isError($process)) {
@@ -531,7 +534,7 @@ class cloudrestful extends cloud
     private function _processRenewals($renewalObj)
     {
         $aArray = $renewalObj ;
-        error_log(print_r($aArray, true), 3, 'renewalObj2.log');
+        error_log(print_r($aArray, true), 3, '/tmp/_processrenewals.log');
         // Not Sure Why, but necessary!
         $node = $renewalObj->children();
 
@@ -598,25 +601,22 @@ class cloudrestful extends cloud
      */
     private function _checkItemRequests($bibId, $patronId, $request, $itemId = false)
     {  
-    error_log(__FILE__ . " line " . __LINE__ . ' _checkItemRequests $bibId=' . $bibId . ' $patronId=' . $patronId . ' $request=' . $request . ' $itemId=' . $itemId ,0);
+//    error_log(__FILE__ . " line " . __LINE__ . ' _checkItemRequests $bibId=' . $bibId . ' $patronId=' . $patronId . ' $request=' . $request . ' $itemId=' . $itemId ,0);
         if (!empty($bibId) && !empty($patronId) && !empty($request) ) {
             $procrequest = 'checkitemrequest';
              // Add Required Params
-
 	    $user = UserAccount::isLoggedIn();
 	    $home_library = $user->home_library;
-		
             $params = array(
                 "RTYPE"     => $request,
                 "PATRON_ID" => $patronId,
-              //  "ORG"       => $this->agency,
                 "homelib"   => $home_library,
                 "BIB_ID"    => $bibId,
                 "ITEM_ID"   => $itemId
             );
-	    error_log(print_r($params, true), 3, '_checkItemRequest1.xml');
+	    error_log(print_r($params, true), 3, '/tmp/_checkItemRequests1.xml');
             $result = $this->_makeRequest($procrequest, $params, "GET", false);
-            error_log(print_r($result, true), 3, '_checkItemRequest2.xml');
+            error_log(print_r($result, true), 3, '/tmp/_checkItemRequests2.xml');
 	    
             if ($result) {
                 // Process
@@ -719,13 +719,10 @@ $xmltopost = "<?xml version='1.0'?>
 
     /**
      * Determine Hold Type
-     *
      * Determines if a user can place a hold or recall on a particular item
-     *
      * @param string $bibId    An item's Bib ID
      * @param string $itemId   An item's Item ID (optional)
      * @param string $patronId The user's Patron ID
-     *
      * @return string          The name of the request method to use or false on
      * failure
      * @access private
@@ -855,8 +852,6 @@ $xmltopost = "<?xml version='1.0'?>
         return $this->_holdError("hold_error_blocked");
     }
 
-    
-     
     /**
      * Cancel Holds
      * Attempts to Cancel a hold or recall on a particular item. The
@@ -869,10 +864,11 @@ $xmltopost = "<?xml version='1.0'?>
     public function cancelHolds($cancelDetails)
     {
         $aArray =  $cancelDetails;
-        error_log(print_r($aArray, true), 3, 'cancelDetails.log');
-	
+        error_log(print_r($aArray, true), 3, '/tmp/cancelDetails.log');
         $details  = $cancelDetails['details'];
         $patron   = $cancelDetails['patron'][0];
+        $user = UserAccount::isLoggedIn();
+        $home_library = $user->home_library;
     //  got patron and [zero] array deepness above
         $count    = 0;
         $response = array();
@@ -892,7 +888,7 @@ $xmltopost = "<?xml version='1.0'?>
                 "TITLE_NUM"      => $itemId,
                 "RSV_ID"         => $cancelID
             );
-            error_log(__FILE__ . " line " . __LINE__ . ' cancelHolds cancelId=' . $cancelID . ' $itemId=' . $itemId   ,0);
+            error_log(__FILE__ . " line " . __LINE__ . ' cancelHolds cancelId=' . $cancelID . ' $itemId=' . $itemId . ' home_library='. $home_library  ,0);
             // Get Data
             // $cancel = $this->_makeRequest($procrequest, $params, "DELETE");
             $cancel = $this->_makeRequest($procrequest, $params, "GET");
@@ -922,21 +918,18 @@ $xmltopost = "<?xml version='1.0'?>
 
     /**
      * Get Cancel Hold Details
-     *
      * In order to cancel a hold, Voyager requires the patron details an item ID
      * and a recall ID. This function returns the item id and recall id as a string
      * separated by a pipe, which is then submitted as form data in Hold.php. This
      * value is then extracted by the CancelHolds function.
-     *
      * @param array $holdDetails An array of item data
-     *
      * @return string Data for use in a form field
      * @access public
      */
     public function getCancelHoldDetails($holdDetails)
     {
         $aArray = $holdDetails ;
-        error_log(print_r($aArray, true), 3, 'holddetails.log');
+        error_log(print_r($aArray, true), 3, '/tmp/holddetails.log');
 // was  $cancelDetails = $holdDetails['item_id']."|".$holdDetails['reqnum'];
         $cancelDetails = $holdDetails['id']."|".$holdDetails['reqnum'];
         return $cancelDetails;
@@ -944,21 +937,18 @@ $xmltopost = "<?xml version='1.0'?>
 
     /**
      * Get Renew Details
-     *
      * In order to renew an item, Voyager requires the patron details and an item
      * id. This function returns the item id as a string which is then used
      * as submitted form data in checkedOut.php. This value is then extracted by
      * the RenewMyItems function.
-     *
      * @param array $checkOutDetails An array of item data
-     *
      * @return string Data for use in a form field
      * @access public
      */
     public function getRenewDetails($checkOutDetails)
     {
         $aArray = $checkOutDetails ;
-        error_log(print_r($aArray, true), 3, 'checkOutDetails.log');
+        error_log(print_r($aArray, true), 3, '/tmp/checkOutDetails.log');
         $renewDetails = $checkOutDetails['id'];
         return $renewDetails;
     }

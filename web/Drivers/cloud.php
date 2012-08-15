@@ -13,7 +13,6 @@ class cloud implements DriverInterface
     protected $dbName;
 
     public function __construct($configFile = false)
-//    function __construct()
     {
         if ($configFile) {
             // Load Configuration passed in
@@ -29,27 +28,21 @@ class cloud implements DriverInterface
 
  $host   = $this->config['Catalog']['host'];
  $db     = $this->config['Catalog']['database'];
- $user   = $this->config['Catalog']['user'];
- $pass   = $this->config['Catalog']['password'];
- 
-//  error_log(__FILE__ . " line " . __LINE__ . '  host=' . $host . ' db=' . $db . ' user=' . $user . ' pass=' . $pass ,0);
+// del $user   = $this->config['Catalog']['user'];
+// del $pass   = $this->config['Catalog']['password'];
 
         // Load Configuration for this Module
         $configArray = parse_ini_file('conf/cloud.ini', true);
         $this->host   = $configArray['Catalog']['host'];
         $this->port   = $configArray['Catalog']['port'];
-	$this->agency = $configArray['Catalog']['agency'];
+// del	$this->agency = $configArray['Catalog']['agency'];
 
     }	
-    
     /**
      * Get Status
-     *
      * This is responsible for retrieving the status information of a certain
      * record.
-     *
      * @param string $id The record id to retrieve the holdings for
-     *
      * @return mixed     On success, an associative array with the following keys:
      * id, availability (boolean), status, location, reserve, callnumber; on
      * failure, a PEAR_Error.
@@ -57,9 +50,8 @@ class cloud implements DriverInterface
      */
     public function getStatus($id)
     {
-      //	$params = 'getstatus?id=' . $id . '&agency=' . $this->agency ;
-	$params = 'getstatus?id=' . $id  ;
-      //  error_log(__FILE__ . " line " . __LINE__ . ' params='. $params,0);
+        $params = 'getstatus?id=' . $id  ;
+        // error_log(__FILE__ . " line " . __LINE__ . ' id of  getStatus='. $id,0);
         $response = $this->search_cloud($params);
         $xml = simplexml_load_string($response);
         $items = array();
@@ -78,36 +70,56 @@ class cloud implements DriverInterface
 	  }	
         return $items ;
     }
-
     /**
      * Get Statuses
-     *
      * This is responsible for retrieving the status information for a
      * collection of records.
-     *
      * @param array $ids The array of record ids to retrieve the status for
-     *
      * @return mixed     An array of getStatus() return values on success,
      * a PEAR_Error object otherwise.
      * @access public
      */
+    public function getitem($id)
+    {
+//        $params = 'getstatus?id=' . $id  ;
+//        error_log(__FILE__ . " line " . __LINE__ . ' id of  getitem='. $id,0);
+//        $response = $this->search_cloud($params);
+//        $xml = simplexml_load_string($response);
+        $items = array();
+//          foreach($xml as $item){
+            $items[] = array(
+	    'id'           => $id,
+            'number'       => 2,
+	    'barcode'      => 3,
+            'availability' => 1,
+            'status'       => 'status',
+            'location'     => 'location',
+            'reserve'      => 'reserve',
+            'callnumber'   => 'callnumber',
+            'duedate'      => ''			
+            );
+//	  }	
+        return $items ;
+    }
+/**
+*  This was calling getStatus for now it calls getitem which does not need to 
+*  call the server this is much faster for now alpat 08/15/2012
+*/
     public function getStatuses($ids)
     {
         $status = array();
         foreach ($ids as $id) {
-            $status[] = $this->getStatus($id);
+//        error_log(__FILE__ . " line " . __LINE__ . ' getStatuses id=' . $id ,0);
+            $status[] = $this->getitem($id);
         }
         return $status;
     }
  
     /**
      * Get Holding
-     *
      * This is responsible for retrieving the holding information of a certain
      * record.
-     *
      * @param string $id The record id to retrieve the holdings for
-     *
      * @return mixed     On success, an associative array with the following keys:
      * id, availability (boolean), status, location, reserve, callnumber, duedate,
      * number, barcode; on failure, a PEAR_Error.
@@ -121,12 +133,9 @@ class cloud implements DriverInterface
 
     /**
      * Get Purchase History
-     *
      * This is responsible for retrieving the acquisitions history data for the
      * specific record (usually recently received issues of a serial).
-     *
      * @param string $id The record id to retrieve the info for
-     *
      * @return mixed     An array with the acquisitions data on success, PEAR_Error
      * on failure
      * @access public
@@ -138,28 +147,24 @@ class cloud implements DriverInterface
 
     /**
      * Patron Login
-     *
      * This is responsible for authenticating a patron against the catalog.
-     *
      * @param string $barcode  The patron barcode
      * @param string $password The patron password
-     *
      * @return mixed           Associative array of patron info on successful login,
      * null on unsuccessful login, PEAR_Error on error.
      * @access public
      */
     public function patronLogin($barcode, $password)
     {
-       // error_log(__FILE__ . " line " . __LINE__ . ' patronLogin barcode='. $barcode . ' password=' . $password,0);
-	
-       // $home_library = $_REQUEST['home_library'];
         $user = UserAccount::isLoggedIn();
 	$home_library = $user->home_library;
-       
- 	$params = 'patronlogin?barcode=' . $barcode . '&password=' . $password . '&homelib=' . $home_library ; 
+        $username     = $user->username;
+        $email        = $user->email;
+
+//     error_log(__file__ . " line " . __line__ . ' home_library =' . $home_library . ' email='. $email ,0);
+        $params = 'patronlogin?homelib='.$home_library.'&barcode='. trim($barcode) . '&username=' . trim($username) .'&password='. trim($password) . '&email=' . trim($email)   ;
         $response = $this->search_cloud($params);
         $xml = simplexml_load_string($response);
-		
 	 $user = array();
 	 foreach($xml as $item){
            $user[] = array(
@@ -175,6 +180,9 @@ class cloud implements DriverInterface
             'reg_date'     => trim($item->reg_date)			
          );		 
 	  }	
+
+      $arlog = $user;
+      error_log(print_r($arlog,true), 3, '/tmp/patronLogin.log');
 	  
       return $user;
     }
@@ -289,15 +297,12 @@ class cloud implements DriverInterface
      */
     public function getMyTransactions($patron)
     {
-    
         $user = UserAccount::isLoggedIn();
 	$home_library = $user->home_library;
-    
 	$pat_id = $patron[0]['pat_id'];	
 	$params = 'getmytransactions?id=' . $pat_id  . '&homelib=' . $home_library  ;		
         $response = $this->search_cloud($params);
         $xml = simplexml_load_string($response);	
-     //   error_log(__FILE__ . " line " . __LINE__ . ' getMyTransactions function pat_id=' . $pat_id   ,0);				
 	foreach($xml as $item){
            $items[] = array(
 	    'duedate'      => trim($item->duedate),
@@ -310,63 +315,8 @@ class cloud implements DriverInterface
 	    }
 //            $aArray = $items;
 //            error_log(print_r($aArray, true), 3, 'debug.log');
-
         return $items;
     }
-
-    /**
-     * Get Funds
-     *
-     * Return a list of funds which may be used to limit the getNewItems list.
-     *
-     * @return array An associative array with key = fund ID, value = fund name.
-     * @access public
-
-    public function getFunds()
-    {
-        return array("alpatFund A", "Fund B", "Fund C");
-    }
-     */
-    /**
-     * Get Departments
-     *
-     * Obtain a list of departments for use in limiting the reserves list.
-     *
-     * @return array An associative array with key = dept. ID, value = dept. name.
-     * @access public
-
-    public function getDepartments()
-    {
-        return array("alpatDept. A", "Dept. B", "Dept. C");
-    }
-     */
-    /**
-     * Get Instructors
-     *
-     * Obtain a list of instructors for use in limiting the reserves list.
-     *
-     * @return array An associative array with key = ID, value = name.
-     * @access public
-
-    public function getInstructors()
-    {
-        return array("alpatInstructor A", "Instructor B", "Instructor C");
-    }
-     */
-    /**
-     * Get Courses
-     *
-     * Obtain a list of courses for use in limiting the reserves list.
-     *
-     * @return array An associative array with key = ID, value = name.
-     * @access public
- 
-    public function getCourses()
-    {
-        return array("alpatCourse A", "Course B", "Course C");
-    }
-
-     */
      
     public function search_cloud($params)  // alpat
     {
@@ -389,8 +339,5 @@ class cloud implements DriverInterface
         return $url;
     }
 
- 	
-	
-	
 }
 ?>
