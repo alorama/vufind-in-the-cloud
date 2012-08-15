@@ -26,7 +26,6 @@
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/developer_manual Wiki
  */
-
 // Retrieve values from configuration file
 require_once 'sys/ConfigArray.php';
 $configArray = readConfig();
@@ -56,11 +55,16 @@ spl_autoload_register('vuFindAutoloader');
 if (file_exists(dirname(__FILE__).'/local_overrides.php')) {
     include_once dirname(__FILE__).'/local_overrides.php';
 }
+
 // alpat test get
-if (isset($_GET['mylibrary'])) {
-  $getloc = $_GET['mylibrary'];
+if (isset($_GET['mylib'])) {
+  $getloc = $_GET['mylib'];
   setcookie('location', $getloc, null,'/');
   $_COOKIE['location'] = $getloc;
+  //  error_log(__file__ . " line " . __line__ . ' if cookie  getloc=' . $getloc,0);
+} else {
+  $getloc = $_COOKIE['location'];
+  //   error_log(__file__ . " line " . __line__ . ' else cookie  getloc=' . $getloc,0);
 }
 
 // Sets global error handler for PEAR errors
@@ -123,7 +127,8 @@ if (isset($_POST['mylang'])) {
 }
 
 $interface->assign('locationList', $configArray['Locations']);
-// Setup Location alpat first try
+// setting up chosen library display name alpat 08/15/2012
+
 if (isset($_POST['mylocn'])) {
     $location = $_POST['mylocn'];
     if ($location == 'All') {
