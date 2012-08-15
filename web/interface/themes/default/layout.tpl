@@ -66,7 +66,7 @@
             </form>
           {/if}
 
-         Select a location: 
+         Select Library 
          <form method="post" name="locnForm" action="">
          <div class="hiddenLabel"><label for="mylocn">{translate text="Location"}:</label></div>
          <select id="mylocn" name="mylocn" onChange="document.locnForm.submit();">
@@ -80,8 +80,17 @@
 	  
         </div>
 
+       {foreach from=$locationList key=locnCode item=locnName}
+        {if $userLocn == $locnCode}
+        <h3>Now Searching {translate text=$locnName}</h3>
+        <a href="{$url}"><img src="{$path}/interface/themes/default/images/{$locnCode}.jpg" alt="VuFind" class="alignleft"></a>
+          {/if}
+         {/foreach}
+ 
+
+
+	
         {if $showTopSearchBox}
-          <a href="{$url}"><img src="{$path}/interface/themes/default/images/vufind_logo.png" alt="VuFind" class="alignleft"></a>
           {if $pageTemplate != 'advanced.tpl'}
             {if $module=="Summon" || $module=="WorldCat" || $module=="Authority"}
               {include file="`$module`/searchbox.tpl"}
